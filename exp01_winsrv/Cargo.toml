@@ -1,0 +1,11 @@
+[package]
+name = "exp01_winsrv"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+windows-service = "0.7.0"
+log = "0.4"
+log4rs = "1.2"
+chrono = "0.4"
+anyhow = "1.0"
