@@ -89,20 +89,20 @@ fn run_service() -> Result<()> {
         // Log that we're running
         info!("I am running at {}", Local::now().format("%Y-%m-%d %H:%M:%S"));
 
-        // Sleep for 60 seconds
-        thread::sleep(Duration::from_secs(5));
+        thread::sleep(Duration::from_secs(1));
     }
 
-    
     status_handle.set_service_status(ServiceStatus {
         service_type: SERVICE_TYPE,
         current_state: ServiceState::StopPending,
         controls_accepted: ServiceControlAccept::empty(),
         exit_code: ServiceExitCode::Win32(0),
         checkpoint: 0,
-        wait_hint: Duration::default(),
+        wait_hint: Duration::new(15, 0),
         process_id: None,
     })?;
+
+    thread::sleep(Duration::from_secs(10));
 
     // Service is stopping
     info!("Service is stopping");
