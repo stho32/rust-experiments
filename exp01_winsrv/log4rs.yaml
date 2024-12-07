@@ -3,7 +3,7 @@ refresh_rate: 30 seconds
 appenders:
   file:
     kind: file
-    path: "service.log"
+    path: "C:\\Projekte\\rust-experiments\\exp01_winsrv\\service.log"
     encoder:
       pattern: "{d(%Y-%m-%d %H:%M:%S)} - {l} - {m}\n"
 

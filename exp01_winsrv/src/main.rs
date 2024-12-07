@@ -22,7 +22,7 @@ const SERVICE_TYPE: ServiceType = ServiceType::OWN_PROCESS;
 
 pub fn main() -> Result<()> {
     // Initialize logging
-    log4rs::init_file("log4rs.yaml", Default::default())?;
+    log4rs::init_file(r"C:\Projekte\rust-experiments\exp01_winsrv\log4rs.yaml", Default::default())?;
 
     if let Err(e) = service_dispatcher::start(SERVICE_NAME, ffi_service_main) {
         error!("Service dispatcher error: {}", e);
@@ -51,9 +51,13 @@ fn run_service() -> Result<()> {
         match control_event {
             ServiceControl::Stop => {
                 info!("Service stop requested");
-                shutdown_tx.send(()).unwrap();
+                match shutdown_tx.send(()) {
+                    Ok(_) => info!("Stop request successfully relayed"),
+                    Err(x) => error!("Stop request not successfully relayed {}", x),
+                }
                 ServiceControlHandlerResult::NoError
             }
+            ServiceControl::Interrogate => ServiceControlHandlerResult::NoError,
             _ => ServiceControlHandlerResult::NotImplemented,
         }
     };
@@ -78,6 +82,7 @@ fn run_service() -> Result<()> {
     loop {
         // Check if we received a shutdown signal
         if shutdown_rx.try_recv().is_ok() {
+            info!("Stop Request recieved and being processed");
             break;
         }
 
@@ -85,11 +90,23 @@ fn run_service() -> Result<()> {
         info!("I am running at {}", Local::now().format("%Y-%m-%d %H:%M:%S"));
 
         // Sleep for 60 seconds
-        thread::sleep(Duration::from_secs(60));
+        thread::sleep(Duration::from_secs(5));
     }
+
+    
+    status_handle.set_service_status(ServiceStatus {
+        service_type: SERVICE_TYPE,
+        current_state: ServiceState::StopPending,
+        controls_accepted: ServiceControlAccept::empty(),
+        exit_code: ServiceExitCode::Win32(0),
+        checkpoint: 0,
+        wait_hint: Duration::default(),
+        process_id: None,
+    })?;
 
     // Service is stopping
     info!("Service is stopping");
+
     status_handle.set_service_status(ServiceStatus {
         service_type: SERVICE_TYPE,
         current_state: ServiceState::Stopped,
